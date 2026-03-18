@@ -1,18 +1,15 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, AlertController, ToastController } from '@ionic/angular';
-import { Firestore, collection, collectionData, doc, updateDoc, query, orderBy } from '@angular/fire/firestore';
+import { IonicModule } from '@ionic/angular';
+import { Firestore, collection, collectionData, doc, updateDoc } from '@angular/fire/firestore';
+import { Auth, authState } from '@angular/fire/auth';
 import { Observable, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { map, catchError, switchMap } from 'rxjs/operators';
 import * as CryptoJS from 'crypto-js';
 import { environment } from 'src/environments/environment';
 import { addIcons } from 'ionicons';
-import { 
-  businessOutline, checkmarkCircle, ellipseOutline, 
-  searchOutline, timeOutline, schoolOutline,
-  chatbubbleEllipsesOutline, archiveOutline
-} from 'ionicons/icons';
+import { businessOutline, checkmarkCircle, ellipseOutline, searchOutline, schoolOutline, archiveOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-recepcion',
@@ -23,64 +20,51 @@ import {
 })
 export class RecepcionPage implements OnInit {
   private firestore = inject(Firestore);
-  private alertCtrl = inject(AlertController);
-  private toastCtrl = inject(ToastController);
+  private auth = inject(Auth);
   private readonly secretKey = environment.cryptoKey;
-
   public grupos$!: Observable<any[]>;
 
   constructor() {
-    addIcons({ 
-      businessOutline, checkmarkCircle, ellipseOutline, 
-      searchOutline, timeOutline, schoolOutline,
-      chatbubbleEllipsesOutline, archiveOutline 
-    });
+    addIcons({ businessOutline, checkmarkCircle, ellipseOutline, searchOutline, schoolOutline, archiveOutline });
   }
 
   ngOnInit() {
-    const ref = collection(this.firestore, 'medidas');
-    this.grupos$ = collectionData(ref, { idField: 'id' }).pipe(
-      map(alumnos => {
-        const descifrados = alumnos.map((a: any) => ({
-          ...a,
-          nombreCompleto: this.decrypt(a['nombreCompleto']),
-          escuela: this.decrypt(a['escuela']),
-          profesor: this.decrypt(a['profesor'] || 'Sin asignar'),
-          notas: this.decrypt(a['notas'] || ''),
-          turno: a['turno'] || 'Único',
-          grado: a['grado'] || 'S/N',
-          recibido: a['recibido'] || false // Campo para la recepción
-        }));
+    this.grupos$ = authState(this.auth).pipe(
+      switchMap(user => {
+        if (!user) return of([]);
+        const numLogueado = user.email?.split('@')[0].trim() || '';
 
-        const gruposMap: any = {};
-        descifrados.forEach(a => {
-          const key = `${a.escuela}-${a.turno}-${a.grado}`;
-          if (!gruposMap[key]) {
-            gruposMap[key] = { 
-              id_grupo: key, 
-              escuela: a.escuela,
-              turno: a.turno,
-              grado: a.grado,
-              profesor: a.profesor,
-              alumnos: [],
-              alumnosFiltrados: null,
-              total: 0,
-              recuperados: 0
-            };
-          }
-          gruposMap[key].alumnos.push(a);
-          gruposMap[key].total++;
-          if (a.recibido) gruposMap[key].recuperados++;
-        });
+        const ref = collection(this.firestore, 'medidas');
+        return collectionData(ref, { idField: 'id' }).pipe(
+          map(alumnos => {
+            const filtrados = alumnos.filter((a: any) => String(a['asignadoA'] || '').trim() === numLogueado);
 
-        return Object.values(gruposMap).sort((a: any, b: any) => 
-          a.escuela.localeCompare(b.escuela) || a.grado.localeCompare(b.grado)
+            const descifrados = filtrados.map((a: any) => ({
+              ...a,
+              nombreCompleto: this.decrypt(a['nombreCompleto']),
+              escuela: this.decrypt(a['escuela']),
+              recibido: a['recibido'] || false
+            }));
+
+            const gruposMap: any = {};
+            descifrados.forEach(a => {
+              const key = `${a.escuela}-${a.grado}`;
+              if (!gruposMap[key]) {
+                gruposMap[key] = { id_grupo: key, escuela: a.escuela, alumnos: [], total: 0, recuperados: 0 };
+              }
+              gruposMap[key].alumnos.push(a);
+              gruposMap[key].total++;
+              if (a.recibido) gruposMap[key].recuperados++;
+            });
+            return Object.values(gruposMap);
+          })
         );
       }),
       catchError(() => of([]))
     );
   }
 
+  // FUNCIONES FALTANTES QUE CAUSABAN EL ERROR
   trackByGrupo(index: number, grupo: any) { return grupo.id_grupo; }
   trackByAlumno(index: number, alumno: any) { return alumno.id; }
   getAlumnos(grupo: any) { return grupo.alumnosFiltrados || grupo.alumnos || []; }
@@ -100,12 +84,6 @@ export class RecepcionPage implements OnInit {
 
   buscarInterno(ev: any, grupo: any) {
     const texto = ev.target.value?.toLowerCase().trim();
-    if (!texto) {
-      grupo.alumnosFiltrados = null;
-      return;
-    }
-    grupo.alumnosFiltrados = grupo.alumnos.filter((a: any) => 
-      a.nombreCompleto.toLowerCase().includes(texto)
-    );
+    grupo.alumnosFiltrados = !texto ? null : grupo.alumnos.filter((a: any) => a.nombreCompleto.toLowerCase().includes(texto));
   }
 }

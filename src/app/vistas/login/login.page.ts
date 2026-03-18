@@ -1,10 +1,15 @@
 import { Component, inject } from '@angular/core';
-import { IonicModule, NavController, ToastController, LoadingController } from '@ionic/angular';
-import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { IonicModule, NavController, ToastController, LoadingController } from '@ionic/angular';
 
-// Importaciones de Firebase
-import { Auth, signInWithEmailAndPassword } from '@angular/fire/auth';
+// Firebase Auth & Firestore
+import { Auth, signInWithEmailAndPassword, signOut } from '@angular/fire/auth';
+import { Firestore, collection, query, where, getDocs } from '@angular/fire/firestore';
+
+// Iconos
+import { addIcons } from 'ionicons';
+import { personOutline, lockClosedOutline, logInOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-login',
@@ -14,88 +19,71 @@ import { Auth, signInWithEmailAndPassword } from '@angular/fire/auth';
   imports: [IonicModule, CommonModule, FormsModule]
 })
 export class LoginPage {
-  // Variables de formulario
   numEmpleado: string = '';
   password: string = '';
 
-  // Inyección de servicios
   private auth = inject(Auth);
-  private navCtrl = inject(NavController); // Para navegación raíz
-  private toastController = inject(ToastController);
-  private loadingController = inject(LoadingController);
+  private firestore = inject(Firestore);
+  private navCtrl = inject(NavController);
+  private toastCtrl = inject(ToastController);
+  private loadingCtrl = inject(LoadingController);
 
-  constructor() {}
+  constructor() {
+    addIcons({ personOutline, lockClosedOutline, logInOutline });
+  }
 
-  /**
-   * Ejecuta la lógica de inicio de sesión
-   */
   async login() {
-    // 1. Validación de campos vacíos
     if (!this.numEmpleado || !this.password) {
-      this.presentToast('Por favor, completa todos los campos', 'warning');
+      this.presentToast('Por favor, ingresa tus credenciales', 'warning');
       return;
     }
 
-    // 2. Mostrar indicador de carga
-    const loading = await this.loadingController.create({
-      message: 'Verificando credenciales...',
+    const loading = await this.loadingCtrl.create({
+      message: 'Iniciando sesión...',
       spinner: 'crescent',
-      cssClass: 'custom-loading' // Por si quieres darle estilo en el global.scss
+      mode: 'ios'
     });
     await loading.present();
 
     try {
-      /**
-       * 3. Intento de Login 
-       * Formateamos el número de empleado para que actúe como correo: 123@estudio.com
-       */
-      const email = `${this.numEmpleado.trim()}@estudio.com`;
-      
-      await signInWithEmailAndPassword(
-        this.auth, 
-        email, 
-        this.password
-      );
+      // FORZAR LIMPIEZA: Eliminamos cualquier rastro del usuario anterior
+      await signOut(this.auth);
 
-      // 4. Éxito: Navegación al HOME
-      // Usamos navigateRoot para que el Home sea la nueva raíz y no se pueda volver al Login con el botón atrás
+      const email = `${this.numEmpleado.trim()}@estudio.com`;
+      await signInWithEmailAndPassword(this.auth, email, this.password);
+
+      // Verificamos el rol en Firestore para saber a dónde mandarlo
+      const usuariosRef = collection(this.firestore, 'usuarios');
+      const q = query(usuariosRef, where("numEmpleado", "==", this.numEmpleado.trim()));
+      const querySnapshot = await getDocs(q);
+
       await loading.dismiss();
-      this.navCtrl.navigateRoot('/home', { animated: true, animationDirection: 'forward' });
+
+      if (!querySnapshot.empty) {
+        const rol = querySnapshot.docs[0].data()['rol'];
+        if (rol === 'admin') {
+          this.navCtrl.navigateRoot('/admin-home');
+        } else {
+          // Ruta de Staff (Tabs)
+          this.navCtrl.navigateRoot('/tabs/home');
+        }
+      } else {
+        this.navCtrl.navigateRoot('/tabs/home');
+      }
 
     } catch (error: any) {
       await loading.dismiss();
-      console.error('Error de login:', error);
-
-      // Manejo de mensajes de error amigables
-      let mensaje = 'Error al iniciar sesión';
-      
-      if (
-        error.code === 'auth/user-not-found' || 
-        error.code === 'auth/wrong-password' || 
-        error.code === 'auth/invalid-credential'
-      ) {
-        mensaje = 'Número de empleado o contraseña incorrectos';
-      } else if (error.code === 'auth/network-request-failed') {
-        mensaje = 'Sin conexión a internet';
-      } else if (error.code === 'auth/too-many-requests') {
-        mensaje = 'Demasiados intentos fallidos. Intenta más tarde.';
-      }
-
-      this.presentToast(mensaje, 'danger');
+      this.presentToast('Número de empleado o contraseña incorrectos', 'danger');
     }
   }
 
-  /**
-   * Muestra alertas rápidas en la parte inferior
-   */
-  async presentToast(message: string, color: 'danger' | 'success' | 'warning') {
-    const toast = await this.toastController.create({
-      message,
-      duration: 2500,
-      color,
-      position: 'bottom',
-      mode: 'ios'
+  async presentToast(message: string, color: string) {
+    const toast = await this.toastCtrl.create({
+      message: message,
+      duration: 3000,
+      color: color as any,
+      position: 'bottom'
     });
-    await toast.present();
+    toast.present();
   }
 }

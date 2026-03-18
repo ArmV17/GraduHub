@@ -1,0 +1,52 @@
+.register-card {
+  background: #ffffff;
+  border-radius: 28px;
+  padding: 25px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  margin-top: 20px;
+
+  .header-section {
+    text-align: center;
+    margin-bottom: 30px;
+    ion-icon {
+      font-size: 3.5rem;
+      color: #3880ff;
+      margin-bottom: 10px;
+    }
+    h2 {
+      font-weight: 900;
+      color: #1a1c20;
+      text-transform: uppercase;
+      margin: 0;
+    }
+    p {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-top: 8px;
+    }
+  }
+}
+
+.form-list {
+  background: transparent;
+  .input-item {
+    --background: #f8fafc;
+    --border-radius: 16px;
+    margin-bottom: 15px;
+    border: 1px solid #f1f5f9;
+    
+    ion-icon {
+      color: #64748b;
+    }
+  }
+}
+
+.btn-register {
+  --background: #1a1c20;
+  --border-radius: 16px;
+  height: 55px;
+  margin-top: 20px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}

@@ -1,18 +1,15 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, AlertController, ToastController } from '@ionic/angular';
-import { Firestore, collection, collectionData, doc, updateDoc, addDoc, query, orderBy } from '@angular/fire/firestore';
+import { IonicModule, AlertController } from '@ionic/angular';
+import { Firestore, collection, collectionData, doc, updateDoc, addDoc } from '@angular/fire/firestore';
+import { Auth, authState } from '@angular/fire/auth';
 import { Observable, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { map, catchError, switchMap } from 'rxjs/operators';
 import * as CryptoJS from 'crypto-js';
 import { environment } from 'src/environments/environment';
 import { addIcons } from 'ionicons';
-import { 
-  businessOutline, personAddOutline, checkmarkCircle, 
-  ellipseOutline, searchOutline, timeOutline, schoolOutline,
-  chatbubbleEllipsesOutline
-} from 'ionicons/icons';
+import { businessOutline, personAddOutline, checkmarkCircle, ellipseOutline, searchOutline, timeOutline, schoolOutline, chatbubbleEllipsesOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-entrega',
@@ -23,91 +20,58 @@ import {
 })
 export class EntregaPage implements OnInit {
   private firestore = inject(Firestore);
+  private auth = inject(Auth);
   private alertCtrl = inject(AlertController);
-  private toastCtrl = inject(ToastController);
   private readonly secretKey = environment.cryptoKey;
-
   public grupos$!: Observable<any[]>;
 
   constructor() {
-    addIcons({ 
-      businessOutline, personAddOutline, checkmarkCircle, 
-      ellipseOutline, searchOutline, timeOutline, schoolOutline,
-      chatbubbleEllipsesOutline 
-    });
+    addIcons({ businessOutline, personAddOutline, checkmarkCircle, ellipseOutline, searchOutline, timeOutline, schoolOutline, chatbubbleEllipsesOutline });
   }
 
   ngOnInit() {
-    const ref = collection(this.firestore, 'medidas');
-    this.grupos$ = collectionData(ref, { idField: 'id' }).pipe(
-      map(alumnos => {
-        const descifrados = alumnos.map((a: any) => ({
-          ...a,
-          nombreCompleto: this.decrypt(a['nombreCompleto']),
-          escuela: this.decrypt(a['escuela']),
-          profesor: this.decrypt(a['profesor'] || 'Sin asignar'),
-          notas: this.decrypt(a['notas'] || ''), // Desciframos notas
-          turno: a['turno'] || 'Único',
-          grado: a['grado'] || 'S/N',
-          entregado: a['entregado'] || false
-        }));
+    this.grupos$ = authState(this.auth).pipe(
+      switchMap(user => {
+        if (!user) return of([]);
+        const numLogueado = user.email?.split('@')[0].trim() || '';
+        
+        const ref = collection(this.firestore, 'medidas');
+        return collectionData(ref, { idField: 'id' }).pipe(
+          map(alumnos => {
+            const filtrados = alumnos.filter((a: any) => String(a['asignadoA'] || '').trim() === numLogueado);
 
-        const gruposMap: any = {};
-        descifrados.forEach(a => {
-          const key = `${a.escuela}-${a.turno}-${a.grado}`;
-          if (!gruposMap[key]) {
-            gruposMap[key] = { 
-              id_grupo: key, 
-              escuela: a.escuela,
-              turno: a.turno,
-              grado: a.grado,
-              profesor: a.profesor,
-              alumnos: [],
-              alumnosFiltrados: null,
-              total: 0,
-              entregados: 0
-            };
-          }
-          gruposMap[key].alumnos.push(a);
-          gruposMap[key].total++;
-          if (a.entregado) gruposMap[key].entregados++;
-        });
+            const descifrados = filtrados.map((a: any) => ({
+              ...a,
+              nombreCompleto: this.decrypt(a['nombreCompleto']),
+              escuela: this.decrypt(a['escuela']),
+              profesor: this.decrypt(a['profesor'] || 'Sin asignar'),
+              turno: a['turno'] || 'Único',
+              grado: a['grado'] || 'S/N',
+              entregado: a['entregado'] || false
+            }));
 
-        return Object.values(gruposMap).sort((a: any, b: any) => 
-          a.escuela.localeCompare(b.escuela) || a.grado.localeCompare(b.grado)
+            const gruposMap: any = {};
+            descifrados.forEach(a => {
+              const key = `${a.escuela}-${a.turno}-${a.grado}`;
+              if (!gruposMap[key]) {
+                gruposMap[key] = { id_grupo: key, escuela: a.escuela, turno: a.turno, grado: a.grado, alumnos: [], total: 0, entregados: 0, asignadoA: numLogueado };
+              }
+              gruposMap[key].alumnos.push(a);
+              gruposMap[key].total++;
+              if (a.entregado) gruposMap[key].entregados++;
+            });
+            return Object.values(gruposMap);
+          })
         );
       }),
       catchError(() => of([]))
     );
   }
 
+  // FUNCIONES FALTANTES QUE CAUSABAN EL ERROR
   trackByGrupo(index: number, grupo: any) { return grupo.id_grupo; }
   trackByAlumno(index: number, alumno: any) { return alumno.id; }
   getAlumnos(grupo: any) { return grupo.alumnosFiltrados || grupo.alumnos || []; }
-
-  private decrypt(text: string): string {
-    if (!text) return '';
-    try {
-      const bytes = CryptoJS.AES.decrypt(text, this.secretKey);
-      return bytes.toString(CryptoJS.enc.Utf8) || text;
-    } catch { return text; }
-  }
-
-  async toggleEntrega(alumno: any) {
-    const docRef = doc(this.firestore, `medidas/${alumno.id}`);
-    await updateDoc(docRef, { entregado: !alumno.entregado });
-  }
-
-  buscarInterno(ev: any, grupo: any) {
-    const texto = ev.target.value?.toLowerCase().trim();
-    if (!texto) {
-      grupo.alumnosFiltrados = null;
-      return;
-    }
-    grupo.alumnosFiltrados = grupo.alumnos.filter((a: any) => 
-      a.nombreCompleto.toLowerCase().includes(texto)
-    );
-  }
 
   async agregarEmergencia(grupo: any) {
     const alert = await this.alertCtrl.create({
@@ -133,6 +97,7 @@ export class EntregaPage implements OnInit {
               tallaToga: data.toga || 'N/A',
               tallaBirrete: data.birrete || 'N/A',
               entregado: true,
+              asignadoA: grupo.asignadoA, 
               fechaRegistro: new Date().getTime()
             });
           }
@@ -140,5 +105,23 @@ export class EntregaPage implements OnInit {
       ]
     });
     await alert.present();
+  }
+
+  private decrypt(text: string): string {
+    if (!text) return '';
+    try {
+      const bytes = CryptoJS.AES.decrypt(text, this.secretKey);
+      return bytes.toString(CryptoJS.enc.Utf8) || text;
+    } catch { return text; }
+  }
+
+  async toggleEntrega(alumno: any) {
+    const docRef = doc(this.firestore, `medidas/${alumno.id}`);
+    await updateDoc(docRef, { entregado: !alumno.entregado });
+  }
+
+  buscarInterno(ev: any, grupo: any) {
+    const texto = ev.target.value?.toLowerCase().trim();
+    grupo.alumnosFiltrados = !texto ? null : grupo.alumnos.filter((a: any) => a.nombreCompleto.toLowerCase().includes(texto));
   }
 }

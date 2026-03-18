@@ -1,18 +1,24 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, NavController, AlertController } from '@ionic/angular';
+import { IonicModule, NavController } from '@ionic/angular';
+
+// Firebase
+import { Auth, authState, signOut } from '@angular/fire/auth';
 import { Firestore, collection, collectionData } from '@angular/fire/firestore';
-import { Auth, signOut } from '@angular/fire/auth';
+
+// RxJS
 import { Observable, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { map, switchMap, catchError } from 'rxjs/operators';
+
+// Utilidades
 import * as CryptoJS from 'crypto-js';
 import { environment } from 'src/environments/environment';
 import { addIcons } from 'ionicons';
 import { 
-  locationOutline, calendarOutline, timeOutline, 
-  schoolOutline, personOutline, searchOutline, 
-  logOutOutline, chatbubbleEllipsesOutline 
+  calendarOutline, locationOutline, timeOutline, 
+  schoolOutline, logOutOutline, personCircleOutline,
+  notificationsOutline, searchOutline, businessOutline
 } from 'ionicons/icons';
 
 @Component({
@@ -23,126 +29,125 @@ import {
   imports: [IonicModule, CommonModule, FormsModule]
 })
 export class HomePage implements OnInit {
-  // Inyección de servicios
-  private firestore = inject(Firestore);
   private auth = inject(Auth);
+  private firestore = inject(Firestore);
   private navCtrl = inject(NavController);
-  private alertCtrl = inject(AlertController);
   private readonly secretKey = environment.cryptoKey;
 
-  // Observable para la lista de eventos
+  // Variable vinculada al async pipe del HTML
   public eventos$!: Observable<any[]>;
 
   constructor() {
-    // Registro de iconos necesarios
     addIcons({ 
-      locationOutline, calendarOutline, timeOutline, 
-      schoolOutline, personOutline, searchOutline, 
-      logOutOutline, chatbubbleEllipsesOutline 
+      calendarOutline, locationOutline, timeOutline, 
+      schoolOutline, logOutOutline, personCircleOutline,
+      notificationsOutline, searchOutline, businessOutline
     });
   }
 
   ngOnInit() {
-    const ref = collection(this.firestore, 'medidas');
-    
-    this.eventos$ = collectionData(ref, { idField: 'id' }).pipe(
-      map(alumnos => {
-        // 1. Descifrado y normalización de datos
-        const descifrados = alumnos.map((a: any) => ({
-          ...a,
-          nombreCompleto: this.decrypt(a['nombreCompleto']),
-          escuela: this.decrypt(a['escuela']),
-          lugar: this.decrypt(a['lugar'] || 'Sin Ubicación'),
-          notas: this.decrypt(a['notas'] || ''),
-          fecha: a['fechaEvento'] || 'Pendiente',
-          hora: a['horaEvento'] || '00:00',
-          grado: a['grado'] || 'S/N',
-          turno: a['turno'] || 'Único'
-        }));
+    // Escuchamos el estado de autenticación de forma reactiva
+    this.eventos$ = authState(this.auth).pipe(
+      switchMap(user => {
+        if (!user) return of([]);
 
-        // 2. Agrupación por Evento (Lugar + Fecha + Escuela + Grado)
-        const gruposMap: any = {};
-        descifrados.forEach(a => {
-          const key = `${a.lugar}-${a.fecha}-${a.escuela}-${a.grado}`;
-          if (!gruposMap[key]) {
-            gruposMap[key] = { 
-              id_evento: key,
-              lugar: a.lugar,
-              fecha: a.fecha,
-              hora: a.hora,
-              escuela: a.escuela,
-              grado: a.grado,
-              turno: a.turno,
-              alumnos: [],
-              alumnosFiltrados: null
-            };
-          }
-          gruposMap[key].alumnos.push(a);
-        });
+        // Extraemos el número de empleado (ej: 0001)
+        const numLogueado = user.email?.split('@')[0].trim() || '';
+        console.log("Cargando agenda para el empleado:", numLogueado);
 
-        // 3. Ordenar por fecha y hora para mostrar lo más próximo arriba
-        return Object.values(gruposMap).sort((a: any, b: any) => 
-          a.fecha.localeCompare(b.fecha) || a.hora.localeCompare(b.hora)
+        const ref = collection(this.firestore, 'medidas');
+        
+        return collectionData(ref, { idField: 'id' }).pipe(
+          map(alumnos => {
+            // 1. Filtrar solo los registros que pertenecen a este empleado
+            const misRegistros = alumnos.filter((a: any) => 
+              String(a['asignadoA'] || '').trim() === numLogueado
+            );
+
+            // 2. Descifrar datos para poder agruparlos visualmente
+            const descifrados = misRegistros.map((a: any) => ({
+              ...a,
+              nombreCompleto: this.decrypt(a['nombreCompleto']),
+              escuela: this.decrypt(a['escuela']),
+              lugar: this.decrypt(a['lugar'] || 'Por confirmar'),
+              profesor: this.decrypt(a['profesor'] || 'Sin asignar')
+            }));
+
+            // 3. Agrupación por Grupo Único (Escuela + Grado + Turno + Fecha)
+            const gruposMap: any = {};
+            descifrados.forEach(a => {
+              // Esta llave evita que el Alumno A y B se mezclen si son de grupos distintos
+              const key = `${a.escuela}-${a.grado}-${a.turno}-${a.fechaEvento || 'pendiente'}`;
+              
+              if (!gruposMap[key]) {
+                gruposMap[key] = { 
+                  id_evento: key, // Usado en el HTML como [value]
+                  escuela: a.escuela,
+                  lugar: a.lugar,
+                  fechaEvento: a.fechaEvento || 'Pendiente',
+                  horaEvento: a.horaEvento || '--:--',
+                  grado: a.grado || 'S/N',
+                  turno: a.turno || 'Único',
+                  alumnos: [],
+                  alumnosFiltrados: null
+                };
+              }
+              // Añadimos al alumno a la lista interna de este grupo
+              gruposMap[key].alumnos.push(a);
+            });
+
+            // Convertimos el mapa a un arreglo ordenado por fecha
+            return Object.values(gruposMap).sort((a: any, b: any) => 
+              a.fechaEvento.localeCompare(b.fechaEvento)
+            );
+          })
         );
       }),
       catchError(err => {
-        console.error("Error cargando agenda:", err);
+        console.error("Error crítico en Home:", err);
         return of([]);
       })
     );
   }
 
-  /**
-   * Cierra la sesión de Firebase y limpia el historial de navegación
-   */
-  async logout() {
-    const alert = await this.alertCtrl.create({
-      header: 'Cerrar Sesión',
-      message: '¿Estás seguro de que deseas salir?',
-      mode: 'ios',
-      buttons: [
-        { text: 'Cancelar', role: 'cancel' },
-        {
-          text: 'Salir',
-          role: 'destructive',
-          handler: async () => {
-            await signOut(this.auth);
-            // navigateRoot asegura que no puedan darle "atrás" para volver al Home
-            this.navCtrl.navigateRoot('/login', { animated: true, animationDirection: 'back' });
-          }
-        }
-      ]
-    });
-    await alert.present();
+  // --- MÉTODOS REQUERIDOS POR EL HTML ---
+
+  trackByEvento(index: number, evento: any) {
+    return evento.id_evento;
   }
 
-  // Funciones auxiliares para el template
-  trackByEvento(index: number, ev: any) { return ev.id_evento; }
-  trackByAlumno(index: number, al: any) { return al.id; }
-  getAlumnos(grupo: any) { return grupo.alumnosFiltrados || grupo.alumnos || []; }
+  trackByAlumno(index: number, alumno: any) {
+    return alumno.id;
+  }
 
-  /**
-   * Descifra texto usando AES
-   */
+  getAlumnos(evento: any) {
+    // Retorna los alumnos filtrados por el buscador o la lista completa
+    return evento.alumnosFiltrados || evento.alumnos || [];
+  }
+
+  buscarInterno(ev: any, evento: any) {
+    const texto = ev.target.value?.toLowerCase().trim();
+    if (!texto) {
+      evento.alumnosFiltrados = null;
+      return;
+    }
+    evento.alumnosFiltrados = evento.alumnos.filter((a: any) => 
+      a.nombreCompleto.toLowerCase().includes(texto)
+    );
+  }
+
   private decrypt(text: string): string {
     if (!text) return '';
     try {
       const bytes = CryptoJS.AES.decrypt(text, this.secretKey);
       return bytes.toString(CryptoJS.enc.Utf8) || text;
-    } catch { return text; }
+    } catch {
+      return text;
+    }
   }
 
-  /**
-   * Filtra alumnos dentro de un acordeón específico
-   */
-  buscarInterno(ev: any, grupo: any) {
-    const texto = ev.target.value?.toLowerCase().trim();
-    if (!texto) {
-      grupo.alumnosFiltrados = null;
-      return;
-    }
-    grupo.alumnosFiltrados = grupo.alumnos.filter((a: any) => 
-      a.nombreCompleto.toLowerCase().includes(texto)
-    );
+  async logout() {
+    await signOut(this.auth);
+    this.navCtrl.navigateRoot('/login');
   }
 }

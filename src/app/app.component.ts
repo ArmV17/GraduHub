@@ -1,5 +1,5 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { IonicModule, NavController } from '@ionic/angular'; 
+import { Component, inject, OnInit } from '@angular/core';
+import { IonicModule, NavController } from '@ionic/angular';
 import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 import { CommonModule } from '@angular/common';
 
@@ -17,11 +17,10 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     onAuthStateChanged(this.auth, (user) => {
-      if (user) {
-        this.navCtrl.navigateRoot('/home');
-      } else {
+      if (!user) {
+        console.log("Sesión inactiva: Mandando al Login");
         this.navCtrl.navigateRoot('/login');
-      }
+      } 
     });
   }
 }

@@ -35,3 +35,192 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
+/* --- FUENTE Y FONDO GENERAL --- */
+:root {
+  --ion-font-family: 'Inter', 'Roboto', sans-serif;
+}
+
+body {
+  background-color: #f4f7fa; 
+}
+
+.gray-bg {
+  --background: #f4f7fa;
+}
+
+/* --- NAVBAR SUPERIOR (MODO OSCURO PREMIUM) --- */
+.custom-toolbar {
+  --background: #1a1c20;
+  --color: #ffffff;
+  --border-width: 0;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: 5px;
+
+  ion-title {
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-size: 1.1rem;
+    color: #ffffff !important;
+  }
+
+  ion-button {
+    --color: #ffffff;
+    font-weight: 700;
+  }
+}
+
+/* --- SEGMENTOS DE NAVEGACIÓN (ADMIN) --- */
+.segment-toolbar {
+  --background: #1a1c20;
+  --border-width: 0;
+  padding-bottom: 15px;
+
+  ion-segment {
+    --background: #2d3139;
+    border-radius: 14px;
+    margin: 0 20px;
+
+    ion-segment-button {
+      --color: #94a3b8;
+      --color-checked: #ffffff;
+      --indicator-color: #3880ff;
+      --indicator-height: 100%;
+      --indicator-border-radius: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+    }
+  }
+}
+
+/* --- TARJETAS DE EVENTOS --- */
+.event-card {
+  background: #ffffff;
+  border-radius: 26px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.04);
+  border: 1px solid #edf2f7;
+
+  .card-top {
+    padding: 20px;
+    background: #ffffff;
+    border-bottom: 1px solid #f1f5f9;
+    
+    h3 {
+      margin: 0;
+      font-weight: 900;
+      color: #1a1c20;
+      text-transform: uppercase;
+      font-size: 1.05rem;
+    }
+
+    .badge {
+      display: inline-block;
+      margin-top: 8px;
+      background: #eef2ff;
+      color: #3880ff;
+      padding: 5px 14px;
+      border-radius: 10px;
+      font-size: 0.7rem;
+      font-weight: 800;
+    }
+  }
+
+  .card-body {
+    padding: 18px;
+  }
+}
+
+/* --- INPUTS Y FORMULARIOS (VISIBILIDAD CORREGIDA) --- */
+.input-item {
+  --background: #f8fafc;
+  --border-radius: 16px;
+  --padding-start: 15px;
+  margin-bottom: 12px;
+  border: 1px solid #e2e8f0;
+
+  /* TEXTO QUE ESCRIBE EL USUARIO (NEGRO PURO) */
+  ion-input {
+    --color: #000000 !important; 
+    color: #000000 !important;
+    font-weight: 700;
+    font-size: 1rem;
+    --placeholder-color: #94a3b8;
+  }
+
+  /* TEXTO DEL SELECTOR (ROL) */
+  ion-select {
+    color: #000000 !important;
+    font-weight: 700;
+    --placeholder-color: #94a3b8;
+  }
+
+  /* ETIQUETAS (TÍTULOS PEQUEÑOS ARRIBA) */
+  ion-label, .label-text {
+    color: #475569 !important; 
+    font-weight: 800 !important;
+    font-size: 0.75rem !important;
+    text-transform: uppercase !important;
+    margin-bottom: 4px !important;
+  }
+
+  ion-icon {
+    color: #3880ff;
+    font-size: 1.4rem;
+  }
+
+  /* Caja especial azul para Staff asignado */
+  &.assigned-box {
+    --background: #f0f4ff !important;
+    border: 1.5px solid #3880ff !important;
+    ion-input { --color: #1e40af !important; color: #1e40af !important; }
+  }
+}
+
+.grid-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* --- BOTONES (FONDO NEGRO / LETRA BLANCA) --- */
+.btn-save-group, .btn-primary, .btn-action {
+  --background: #1a1c20 !important; // Fondo negro
+  --color: #ffffff !important;      // Letra blanca
+  --border-radius: 16px;
+  --box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  margin-top: 12px;
+  height: 56px;
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #ffffff !important; // Refuerzo para el texto
+}
+
+/* --- TARJETA DE REGISTRO (STAFF) --- */
+.main-card {
+  background: #ffffff;
+  border-radius: 32px;
+  padding: 40px 25px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
+
+  .icon-circle {
+    width: 80px; height: 80px; background: #eef2ff; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;
+    ion-icon { font-size: 2.5rem; color: #3880ff; }
+  }
+
+  h2 { font-weight: 900; font-size: 1.5rem; color: #1a1c20; margin-bottom: 8px; }
+  p { color: #94a3b8; font-size: 0.95rem; margin-bottom: 30px; }
+}
+
+/* Contenedor responsivo */
+.responsive-container {
+  max-width: 500px;
+  margin: 0 auto;
+}
