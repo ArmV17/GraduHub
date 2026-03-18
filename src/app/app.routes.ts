@@ -3,6 +3,15 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
+    redirectTo: 'login',
+    pathMatch: 'full'
+  },
+  {
+    path: 'login',
+    loadComponent: () => import('./vistas/login/login.page').then(m => m.LoginPage)
+  },
+  {
+    path: '',
     loadComponent: () => import('./vistas/tabs/tabs.page').then(m => m.TabsPage),
     children: [
       {
@@ -27,25 +36,5 @@ export const routes: Routes = [
         pathMatch: 'full'
       }
     ]
-  },
-  {
-    path: 'login',
-    loadComponent: () => import('./vistas/login/login.page').then(m => m.LoginPage)
-  },
-  {
-    path: 'entrega',
-    loadComponent: () => import('./vistas/entrega/entrega.page').then( m => m.EntregaPage)
-  },
-  {
-    path: 'recepcion',
-    loadComponent: () => import('./vistas/recepcion/recepcion.page').then( m => m.RecepcionPage)
-  },
-  {
-    path: 'medicion',
-    loadComponent: () => import('./vistas/medicion/medicion.page').then( m => m.MedicionPage)
-  },
-  {
-    path: 'login',
-    loadComponent: () => import('./vistas/login/login.page').then( m => m.LoginPage)
   }
 ];
