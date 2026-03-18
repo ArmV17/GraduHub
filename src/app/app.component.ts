@@ -1,13 +1,13 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { IonicModule, NavController } from '@ionic/angular'; // Importar IonicModule
+import { IonicModule, NavController } from '@ionic/angular'; 
 import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
-  standalone: true, // Tu componente es standalone
-  imports: [IonicModule, CommonModule], // AQUÍ es donde debes agregarlo
+  standalone: true,
+  imports: [IonicModule, CommonModule],
 })
 export class AppComponent implements OnInit {
   private auth = inject(Auth);
@@ -16,7 +16,6 @@ export class AppComponent implements OnInit {
   constructor() {}
 
   ngOnInit() {
-    // Observador para redirección automática y protección
     onAuthStateChanged(this.auth, (user) => {
       if (user) {
         this.navCtrl.navigateRoot('/home');
