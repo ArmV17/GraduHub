@@ -1,0 +1,284 @@
+/* --- CONFIGURACIÓN GENERAL --- */
+.gray-bg {
+  --background: #f8f9fa;
+}
+
+.responsive-container {
+  max-width: 950px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* --- TOOLBAR DARK --- */
+.custom-toolbar {
+  --background: #1e1e1e;
+  --color: #ffffff;
+  ion-title {
+    font-weight: 800;
+  }
+}
+
+/* --- TARJETA DE FORMULARIO (MANTENEMOS CLARO) --- */
+.form-card {
+  background: white;
+  padding: 25px;
+  border-radius: 25px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+  margin-bottom: 25px;
+
+  .header-with-lock {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+}
+
+/* --- CORRECCIÓN DE TURNO EN PC --- */
+.turno-col-pc {
+  display: flex;
+  flex-direction: column;
+  margin-top: 15px;
+}
+
+.label-talla-turno {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+@media (min-width: 768px) {
+  .turno-col-pc {
+    margin-top: 0;
+    padding-left: 20px;
+    justify-content: flex-end;
+    
+    .label-talla-turno {
+      margin-top: 0;
+    }
+    
+    .talla-segment-turno {
+      margin-bottom: 10px;
+    }
+  }
+}
+
+/* --- INPUTS Y SEGMENTS DEL FORMULARIO --- */
+.section-title {
+  color: #071739;
+  font-weight: 800;
+  border-left: 4px solid #3880ff;
+  padding-left: 12px;
+  font-size: 1.2rem;
+}
+
+.custom-input {
+  --background: #f9f9f9;
+  --border-radius: 12px;
+  margin-bottom: 10px;
+  border: 1px solid #f0f0f0;
+
+  ion-label {
+    color: #071739 !important;
+    font-weight: 700;
+    font-size: 0.85rem;
+  }
+
+  ion-input, ion-textarea {
+    --color: #000 !important;
+    font-weight: 500;
+  }
+}
+
+.talla-segment, .talla-segment-turno {
+  --background: #f4f5f8;
+  border-radius: 12px;
+  
+  ion-segment-button {
+    --color: #071739;
+    --color-checked: white;
+    --indicator-color: #071739;
+    font-weight: bold;
+    min-height: 45px;
+  }
+}
+
+.label-talla {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #666;
+  margin: 15px 0 10px 5px;
+  text-transform: uppercase;
+}
+
+.btn-guardar {
+  margin-top: 30px;
+  --background: #071739;
+  --color: #ffffff;
+  --border-radius: 15px;
+  height: 55px;
+  font-weight: 800;
+}
+
+/* --- BUSCADOR GRIS --- */
+.custom-search {
+  --background: #e0e0e0; // Gris para el buscador
+  --border-radius: 15px;
+  margin: 15px 0 25px 0;
+  --color: #333;
+}
+
+/* --- TARJETA DE RESULTADO (VUELVE A NEGRO / DARK) --- */
+.alumno-card-pro {
+  background: #1e1e1e; // Negro/Gris muy oscuro
+  border-radius: 24px;
+  margin-bottom: 25px;
+  overflow: hidden;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+
+  .card-header-pro {
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+    .badge-group {
+      display: flex;
+      gap: 10px;
+      
+      .status-badge {
+        background: #eb445a; 
+        color: white;
+        padding: 4px 12px;
+        border-radius: 8px;
+        font-size: 0.7rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        &.matutino { background: #2dd36f; }
+      }
+      
+      .grade-badge {
+        background: rgba(56, 128, 255, 0.2);
+        color: #3880ff;
+        padding: 4px 12px;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        font-weight: 800;
+      }
+    }
+    
+    .delete-btn {
+      --color: #eb445a;
+    }
+  }
+
+  .card-content-pro {
+    padding: 20px 25px;
+
+    .school-name {
+      color: #aaa;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .student-name {
+      color: #3880ff; // Azul brillante para el nombre
+      font-size: 1.6rem; 
+      font-weight: 900;
+      margin: 5px 0 20px 0;
+      text-transform: uppercase;
+      line-height: 1.1;
+    }
+
+    .sizes-container {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+
+      .size-item {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 15px;
+        border-radius: 18px;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+
+        .size-label {
+          display: block;
+          color: #777;
+          font-size: 0.7rem;
+          font-weight: 800;
+          margin-bottom: 4px;
+          text-transform: uppercase;
+        }
+
+        .size-value {
+          color: #fff;
+          font-size: 1.6rem;
+          font-weight: 900;
+        }
+      }
+    }
+
+    .notes-pro {
+      background: rgba(255, 196, 9, 0.1);
+      border-left: 4px solid #ffc409;
+      padding: 15px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      ion-icon {
+        color: #ffc409;
+        font-size: 1.4rem;
+      }
+
+      p {
+        color: #ffc409;
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 700;
+      }
+    }
+  }
+
+  .card-footer-pro {
+    background: rgba(0, 0, 0, 0.4);
+    padding: 12px 25px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+
+    ion-icon {
+      color: #3880ff;
+      font-size: 1.3rem;
+    }
+
+    strong {
+      color: #fff;
+      font-weight: 700;
+    }
+  }
+}
+
+/* --- OTROS --- */
+.text-lock-container {
+  cursor: pointer;
+  .lock-action-text {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: #666;
+    &.is-locked { color: #071739; text-decoration: underline; }
+  }
+}
