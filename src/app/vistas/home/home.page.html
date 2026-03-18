@@ -1,20 +1,68 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Blank
-    </ion-title>
+<ion-header class="ion-no-border">
+  <ion-toolbar class="custom-toolbar">
+    <ion-title>Agenda de Graduaciones</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="gray-bg ion-padding">
+  <div class="responsive-container">
+    
+    <ion-accordion-group expand="inset">
+      <ion-accordion *ngFor="let ev of (eventos$ | async); trackBy: trackByEvento" [value]="ev.id_evento" class="group-card">
+        
+        <ion-item slot="header" lines="none" class="card-item-header" detail="false">
+          <ion-label>
+            <h2 class="school-name-white">{{ ev.escuela }}</h2>
+            
+            <div class="group-info-light">
+              <div class="event-details-main">
+                <span class="location-text">
+                  <ion-icon name="location-outline"></ion-icon> {{ ev.lugar }}
+                </span>
+              </div>
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
+              <div class="event-badges">
+                <span class="badge-pill fecha">
+                  <ion-icon name="calendar-outline"></ion-icon> {{ ev.fecha }}
+                </span>
+                <span class="badge-pill hora">
+                  <ion-icon name="time-outline"></ion-icon> {{ ev.hora }}
+                </span>
+                <span class="badge-pill grado">
+                  {{ ev.grado }} - {{ ev.turno }}
+                </span>
+              </div>
+            </div>
+          </ion-label>
+        </ion-item>
+
+        <div slot="content" class="list-content">
+          <div class="search-box">
+            <ion-searchbar (ionInput)="buscarInterno($event, ev)" placeholder="Consultar alumno..." mode="ios" class="inner-search-gray"></ion-searchbar>
+          </div>
+
+          <div class="students-container">
+            <div *ngFor="let a of getAlumnos(ev); trackBy: trackByAlumno" class="student-delivery-row">
+              <div class="student-content">
+                <div class="header-row">
+                  <span class="name">{{ a.nombreCompleto }}</span>
+                  <ion-icon name="person-outline" color="medium" style="font-size: 1.2rem;"></ion-icon>
+                </div>
+
+                <div class="details-row">
+                  <span class="size-tag">Toga: <b>{{ a.tallaToga }}</b></span>
+                  <span class="size-tag">Birrete: <b>{{ a.tallaBirrete }}</b></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="footer-info">
+            <p>Total de alumnos en este grupo: {{ ev.alumnos.length }}</p>
+          </div>
+        </div>
+      </ion-accordion>
+    </ion-accordion-group>
+
   </div>
 </ion-content>

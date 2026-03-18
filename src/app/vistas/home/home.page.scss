@@ -1,27 +1,221 @@
-#container {
-  text-align: center;
-
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+/* --- CONFIGURACIÓN DE FONDO Y CONTENEDOR --- */
+.gray-bg {
+  --background: #f4f5f8;
 }
 
-#container strong {
-  font-size: 20px;
-  line-height: 26px;
+.responsive-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 10px;
 }
 
-#container p {
-  font-size: 16px;
-  line-height: 22px;
+/* --- TOOLBAR --- */
+.custom-toolbar {
+  --background: #1e1e1e;
+  --color: #ffffff;
+  ion-title {
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+}
 
-  color: #8c8c8c;
+/* --- TARJETA DE GRUPO (ESTILO DARK ANTERIOR) --- */
+.group-card {
+  background: #1a1c20 !important;
+  margin-bottom: 16px;
+  border-radius: 24px !important;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
 
+  .card-item-header {
+    --background: #1a1c20;
+    --color: #ffffff;
+    --padding-top: 15px;
+    --padding-bottom: 15px;
+
+    &::part(detail-icon) {
+      display: none; // Quita la flechita
+    }
+
+    .school-name-white {
+      display: block;
+      color: #ffffff !important;
+      font-weight: 900;
+      font-size: 1.1rem;
+      line-height: 1.3;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .group-info-light {
+      .profesor-label {
+        color: #94a3b8;
+        font-size: 0.85rem;
+        display: block;
+        margin-bottom: 10px;
+        strong { color: #eee; }
+      }
+
+      .event-badges {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+
+        .badge-pill {
+          padding: 4px 10px;
+          border-radius: 8px;
+          font-size: 0.7rem;
+          font-weight: 800;
+          text-transform: uppercase;
+          background: rgba(255, 255, 255, 0.08);
+          color: #94a3b8;
+          display: flex;
+          align-items: center;
+          gap: 4px;
+
+          &.grado {
+            background: rgba(56, 128, 255, 0.15);
+            color: #3880ff;
+          }
+
+          &.counter {
+            background: #3880ff;
+            color: #ffffff;
+            &.completed { background: #2dd36f; }
+          }
+        }
+      }
+    }
+  }
+}
+
+/* --- CONTENIDO DE LA LISTA BLANCA --- */
+.list-content {
+  background: #ffffff;
+  padding: 10px 15px !important;
+
+  /* BUSCADOR GRIS */
+  .inner-search-gray {
+    --background: #e9ecef; 
+    --border-radius: 12px;
+    --color: #495057;
+    --placeholder-color: #6c757d;
+    margin-bottom: 15px;
+  }
+
+  /* CONTENEDOR DE CADA ALUMNO */
+  .student-delivery-row {
+    padding: 12px 0;
+    border-bottom: 1px solid #f1f5f9;
+
+    .student-content {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+
+      /* FILA SUPERIOR: NOMBRE Y BOTÓN AL LADO */
+      .header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 4px;
+        gap: 12px;
+
+        .name {
+          color: #071739;
+          font-weight: 800;
+          font-size: 0.9rem;
+          text-transform: uppercase;
+          flex: 1;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+    }
+  }
+}
+
+/* --- BOTÓN MINI PARA CELULAR --- */
+.btn-check-mini {
+  --border-radius: 8px;
+  --padding-start: 10px;
+  --padding-end: 10px;
+  height: 28px; 
+  font-size: 0.65rem;
+  font-weight: 800;
   margin: 0;
+  min-width: 85px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  ion-icon {
+    font-size: 0.8rem;
+    margin-right: 3px;
+  }
 }
 
-#container a {
-  text-decoration: none;
+/* --- DETALLES DE TALLAS --- */
+.details-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 4px;
+
+  .size-tag {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 600;
+    b { 
+      color: #3880ff; 
+      background: #f1f5f9; 
+      padding: 1px 5px; 
+      border-radius: 4px; 
+    }
+  }
+}
+
+/* --- FILA DE NOTAS --- */
+.notes-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: #fffbe6;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border-left: 3px solid #ffd000;
+  margin-top: 2px;
+
+  ion-icon {
+    font-size: 0.9rem;
+    color: #856404;
+  }
+
+  .notes-text {
+    font-size: 0.7rem;
+    color: #856404;
+    font-style: italic;
+  }
+}
+
+/* --- BOTÓN AGREGAR EXTRA --- */
+.btn-add-extra {
+  margin-top: 15px;
+  --color: #3880ff;
+  font-weight: 900;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+/* --- RESPONSIVIDAD PC --- */
+@media (min-width: 768px) {
+  .btn-check-mini {
+    height: 35px;
+    font-size: 0.8rem;
+    min-width: 110px;
+  }
+  .header-row .name {
+    font-size: 1.1rem !important;
+  }
 }
