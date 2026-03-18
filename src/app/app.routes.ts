@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './guards/auth.guard'; // Importa tu guardia
 
 export const routes: Routes = [
   {
@@ -13,14 +14,11 @@ export const routes: Routes = [
   {
     path: '',
     loadComponent: () => import('./vistas/tabs/tabs.page').then(m => m.TabsPage),
+    canActivate: [authGuard],
     children: [
       {
         path: 'home',
         loadComponent: () => import('./vistas/home/home.page').then(m => m.HomePage)
-      },
-      {
-        path: 'medicion',
-        loadComponent: () => import('./vistas/medicion/medicion.page').then(m => m.MedicionPage)
       },
       {
         path: 'entrega',
@@ -31,9 +29,8 @@ export const routes: Routes = [
         loadComponent: () => import('./vistas/recepcion/recepcion.page').then(m => m.RecepcionPage)
       },
       {
-        path: '',
-        redirectTo: 'home',
-        pathMatch: 'full'
+        path: 'medicion',
+        loadComponent: () => import('./vistas/medicion/medicion.page').then(m => m.MedicionPage)
       }
     ]
   }

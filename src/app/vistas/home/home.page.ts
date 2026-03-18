@@ -11,8 +11,8 @@ import { environment } from 'src/environments/environment';
 import { addIcons } from 'ionicons';
 import { 
   locationOutline, calendarOutline, timeOutline, 
-  schoolOutline, personOutline, searchOutline, logOutOutline,
-  chatbubbleEllipsesOutline 
+  schoolOutline, personOutline, searchOutline, 
+  logOutOutline, chatbubbleEllipsesOutline 
 } from 'ionicons/icons';
 
 @Component({
@@ -23,38 +23,44 @@ import {
   imports: [IonicModule, CommonModule, FormsModule]
 })
 export class HomePage implements OnInit {
+  // Inyección de servicios
   private firestore = inject(Firestore);
   private auth = inject(Auth);
   private navCtrl = inject(NavController);
   private alertCtrl = inject(AlertController);
   private readonly secretKey = environment.cryptoKey;
 
+  // Observable para la lista de eventos
   public eventos$!: Observable<any[]>;
 
   constructor() {
+    // Registro de iconos necesarios
     addIcons({ 
       locationOutline, calendarOutline, timeOutline, 
-      schoolOutline, personOutline, searchOutline, logOutOutline,
-      chatbubbleEllipsesOutline 
+      schoolOutline, personOutline, searchOutline, 
+      logOutOutline, chatbubbleEllipsesOutline 
     });
   }
 
   ngOnInit() {
     const ref = collection(this.firestore, 'medidas');
+    
     this.eventos$ = collectionData(ref, { idField: 'id' }).pipe(
       map(alumnos => {
+        // 1. Descifrado y normalización de datos
         const descifrados = alumnos.map((a: any) => ({
           ...a,
           nombreCompleto: this.decrypt(a['nombreCompleto']),
           escuela: this.decrypt(a['escuela']),
           lugar: this.decrypt(a['lugar'] || 'Sin Ubicación'),
-          notas: this.decrypt(a['notas'] || ''), // Desciframos notas para el Home
+          notas: this.decrypt(a['notas'] || ''),
           fecha: a['fechaEvento'] || 'Pendiente',
           hora: a['horaEvento'] || '00:00',
           grado: a['grado'] || 'S/N',
           turno: a['turno'] || 'Único'
         }));
 
+        // 2. Agrupación por Evento (Lugar + Fecha + Escuela + Grado)
         const gruposMap: any = {};
         descifrados.forEach(a => {
           const key = `${a.lugar}-${a.fecha}-${a.escuela}-${a.grado}`;
@@ -74,14 +80,21 @@ export class HomePage implements OnInit {
           gruposMap[key].alumnos.push(a);
         });
 
+        // 3. Ordenar por fecha y hora para mostrar lo más próximo arriba
         return Object.values(gruposMap).sort((a: any, b: any) => 
           a.fecha.localeCompare(b.fecha) || a.hora.localeCompare(b.hora)
         );
       }),
-      catchError(() => of([]))
+      catchError(err => {
+        console.error("Error cargando agenda:", err);
+        return of([]);
+      })
     );
   }
 
+  /**
+   * Cierra la sesión de Firebase y limpia el historial de navegación
+   */
   async logout() {
     const alert = await this.alertCtrl.create({
       header: 'Cerrar Sesión',
@@ -94,7 +107,8 @@ export class HomePage implements OnInit {
           role: 'destructive',
           handler: async () => {
             await signOut(this.auth);
-            this.navCtrl.navigateRoot('/login');
+            // navigateRoot asegura que no puedan darle "atrás" para volver al Home
+            this.navCtrl.navigateRoot('/login', { animated: true, animationDirection: 'back' });
           }
         }
       ]
@@ -102,10 +116,14 @@ export class HomePage implements OnInit {
     await alert.present();
   }
 
+  // Funciones auxiliares para el template
   trackByEvento(index: number, ev: any) { return ev.id_evento; }
   trackByAlumno(index: number, al: any) { return al.id; }
   getAlumnos(grupo: any) { return grupo.alumnosFiltrados || grupo.alumnos || []; }
 
+  /**
+   * Descifra texto usando AES
+   */
   private decrypt(text: string): string {
     if (!text) return '';
     try {
@@ -114,6 +132,9 @@ export class HomePage implements OnInit {
     } catch { return text; }
   }
 
+  /**
+   * Filtra alumnos dentro de un acordeón específico
+   */
   buscarInterno(ev: any, grupo: any) {
     const texto = ev.target.value?.toLowerCase().trim();
     if (!texto) {
