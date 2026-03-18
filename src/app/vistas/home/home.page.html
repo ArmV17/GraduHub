@@ -1,6 +1,11 @@
 <ion-header class="ion-no-border">
   <ion-toolbar class="custom-toolbar">
-    <ion-title>Agenda de Graduaciones</ion-title>
+    <ion-title>Agenda</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon slot="icon-only" name="log-out-outline" color="danger"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -13,24 +18,14 @@
         <ion-item slot="header" lines="none" class="card-item-header" detail="false">
           <ion-label>
             <h2 class="school-name-white">{{ ev.escuela }}</h2>
-            
             <div class="group-info-light">
               <div class="event-details-main">
-                <span class="location-text">
-                  <ion-icon name="location-outline"></ion-icon> {{ ev.lugar }}
-                </span>
+                <span class="location-text"><ion-icon name="location-outline"></ion-icon> {{ ev.lugar }}</span>
               </div>
-
               <div class="event-badges">
-                <span class="badge-pill fecha">
-                  <ion-icon name="calendar-outline"></ion-icon> {{ ev.fecha }}
-                </span>
-                <span class="badge-pill hora">
-                  <ion-icon name="time-outline"></ion-icon> {{ ev.hora }}
-                </span>
-                <span class="badge-pill grado">
-                  {{ ev.grado }} - {{ ev.turno }}
-                </span>
+                <span class="badge-pill fecha"><ion-icon name="calendar-outline"></ion-icon> {{ ev.fecha }}</span>
+                <span class="badge-pill hora"><ion-icon name="time-outline"></ion-icon> {{ ev.hora }}</span>
+                <span class="badge-pill grado">{{ ev.grado }} - {{ ev.turno }}</span>
               </div>
             </div>
           </ion-label>
@@ -46,23 +41,25 @@
               <div class="student-content">
                 <div class="header-row">
                   <span class="name">{{ a.nombreCompleto }}</span>
-                  <ion-icon name="person-outline" color="medium" style="font-size: 1.2rem;"></ion-icon>
+                  <ion-icon name="person-outline" color="medium"></ion-icon>
                 </div>
 
                 <div class="details-row">
                   <span class="size-tag">Toga: <b>{{ a.tallaToga }}</b></span>
                   <span class="size-tag">Birrete: <b>{{ a.tallaBirrete }}</b></span>
                 </div>
+
+                <div class="notes-row" *ngIf="a.notes || a.notas">
+                  <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
+                  <span class="notes-text">{{ a.notas }}</span>
+                </div>
               </div>
             </div>
           </div>
           
-          <div class="footer-info">
-            <p>Total de alumnos en este grupo: {{ ev.alumnos.length }}</p>
-          </div>
+          <div class="footer-count">Total: {{ ev.alumnos.length }} alumnos</div>
         </div>
       </ion-accordion>
     </ion-accordion-group>
-
   </div>
 </ion-content>

@@ -1,8 +1,9 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, NavController, AlertController } from '@ionic/angular';
 import { Firestore, collection, collectionData } from '@angular/fire/firestore';
+import { Auth, signOut } from '@angular/fire/auth';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import * as CryptoJS from 'crypto-js';
@@ -10,18 +11,22 @@ import { environment } from 'src/environments/environment';
 import { addIcons } from 'ionicons';
 import { 
   locationOutline, calendarOutline, timeOutline, 
-  schoolOutline, personOutline, searchOutline 
+  schoolOutline, personOutline, searchOutline, logOutOutline,
+  chatbubbleEllipsesOutline 
 } from 'ionicons/icons';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.page.html',
-  styleUrls: ['./home.page.scss'], // Usarás el mismo SCSS
+  styleUrls: ['./home.page.scss'],
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule]
 })
 export class HomePage implements OnInit {
   private firestore = inject(Firestore);
+  private auth = inject(Auth);
+  private navCtrl = inject(NavController);
+  private alertCtrl = inject(AlertController);
   private readonly secretKey = environment.cryptoKey;
 
   public eventos$!: Observable<any[]>;
@@ -29,7 +34,8 @@ export class HomePage implements OnInit {
   constructor() {
     addIcons({ 
       locationOutline, calendarOutline, timeOutline, 
-      schoolOutline, personOutline, searchOutline 
+      schoolOutline, personOutline, searchOutline, logOutOutline,
+      chatbubbleEllipsesOutline 
     });
   }
 
@@ -41,16 +47,16 @@ export class HomePage implements OnInit {
           ...a,
           nombreCompleto: this.decrypt(a['nombreCompleto']),
           escuela: this.decrypt(a['escuela']),
-          lugar: this.decrypt(a['lugar'] || 'S/N'), // Campo de ubicación
-          fecha: a['fechaEvento'] || 'Pendiente',   // Campo de fecha
-          hora: a['horaEvento'] || '00:00',         // Campo de hora
+          lugar: this.decrypt(a['lugar'] || 'Sin Ubicación'),
+          notas: this.decrypt(a['notas'] || ''), // Desciframos notas para el Home
+          fecha: a['fechaEvento'] || 'Pendiente',
+          hora: a['horaEvento'] || '00:00',
           grado: a['grado'] || 'S/N',
           turno: a['turno'] || 'Único'
         }));
 
         const gruposMap: any = {};
         descifrados.forEach(a => {
-          // Agrupamos por Lugar + Fecha + Escuela + Grado
           const key = `${a.lugar}-${a.fecha}-${a.escuela}-${a.grado}`;
           if (!gruposMap[key]) {
             gruposMap[key] = { 
@@ -74,6 +80,26 @@ export class HomePage implements OnInit {
       }),
       catchError(() => of([]))
     );
+  }
+
+  async logout() {
+    const alert = await this.alertCtrl.create({
+      header: 'Cerrar Sesión',
+      message: '¿Estás seguro de que deseas salir?',
+      mode: 'ios',
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Salir',
+          role: 'destructive',
+          handler: async () => {
+            await signOut(this.auth);
+            this.navCtrl.navigateRoot('/login');
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 
   trackByEvento(index: number, ev: any) { return ev.id_evento; }
