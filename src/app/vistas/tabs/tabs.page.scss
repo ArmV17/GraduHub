@@ -1,39 +1,83 @@
-.graduhub-tabs {
-  --background: #1e1e1e;
-  --border-color: rgba(255, 255, 255, 0.1);
-  height: 70px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.3);
+/* --- LIMPIEZA TOTAL --- */
+ion-tab-bar {
+  display: none !important;
+}
+
+/* 1. Quitamos la máscara de aquí, causaba la mancha blanca/gris */
+ion-tabs {
+  background: transparent;
+}
+
+.floating-container {
+  position: fixed;
+  bottom: 20px;
+  left: 5%;
+  right: 5%;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.floating-tab-bar {
+  position: relative;
+  width: 100%;
+  height: 75px; // Un poco más alto para el nombre
+  background: #000000 !important; // NEGRO SÓLIDO
+  border-radius: 20px;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start; // Iconos arriba
+  padding-top: 8px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 
   ion-tab-button {
-    --color: #888;
-    --color-selected: #3880ff;
-    transition: all 0.3s ease;
+    --background: transparent !important;
+    --color: #444;
+    --color-selected: #ffffff;
+    height: 45px; // Altura fija para que no tape el nombre
+    margin: 0;
 
-    ion-icon {
-      font-size: 1.7rem;
-      margin-bottom: 2px;
+    &.tab-selected .indicator, &.tab-selected .spotlight {
+      opacity: 1;
     }
+  }
 
-    ion-label {
-      font-size: 0.65rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    &.tab-selected {
-      ion-icon {
-        transform: translateY(-2px);
-      }
-    }
+  /* EL NOMBRE ADENTRO EN LA PARTE INFERIOR */
+  .inner-user-label {
+    position: absolute;
+    bottom: 6px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.4); // Blanco tenue para que no distraiga
+    font-size: 0.55rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    pointer-events: none;
   }
 }
 
-/* Efecto blur para que se vea moderno */
-@supports (backdrop-filter: blur(15px)) {
-  .graduhub-tabs {
-    --background: rgba(30, 30, 30, 0.85);
-    backdrop-filter: blur(15px);
-  }
+.indicator {
+  position: absolute;
+  top: 0;
+  width: 30px;
+  height: 3px;
+  background: #ffffff;
+  box-shadow: 0 0 10px #fff;
+  opacity: 0;
+  transition: 0.3s;
+}
+
+.spotlight {
+  position: absolute;
+  top: 0;
+  width: 50px;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.12), transparent);
+  clip-path: polygon(25% 0%, 75% 0%, 100% 100%, 0% 100%);
+  opacity: 0;
+  transition: 0.3s;
 }

@@ -1,25 +1,33 @@
 <ion-tabs>
-  <ion-tab-bar slot="bottom" class="graduhub-tabs">
-    
-    <ion-tab-button tab="home">
-      <ion-icon name="calendar-number-outline"></ion-icon>
-      <ion-label>Eventos</ion-label>
-    </ion-tab-button>
+  <div class="floating-container">
+    <div class="floating-tab-bar">
+      
+      <ion-tab-button tab="home" [class.tab-selected]="selectedTab === 'home'">
+        <div class="indicator"></div>
+        <ion-icon name="home-outline"></ion-icon>
+        <div class="spotlight"></div>
+      </ion-tab-button>
 
-    <ion-tab-button tab="medicion">
-      <ion-icon name="pencil-outline"></ion-icon>
-      <ion-label>Medidas</ion-label>
-    </ion-tab-button>
+      <ion-tab-button tab="medicion" [class.tab-selected]="selectedTab === 'medicion'">
+        <div class="indicator"></div>
+        <ion-icon name="add-circle-outline"></ion-icon>
+        <div class="spotlight"></div>
+      </ion-tab-button>
 
-    <ion-tab-button tab="entrega">
-      <ion-icon name="shirt-outline"></ion-icon>
-      <ion-label>Entrega</ion-label>
-    </ion-tab-button>
+      <ion-tab-button tab="recepcion" [class.tab-selected]="selectedTab === 'recepcion'">
+        <div class="indicator"></div>
+        <ion-icon name="archive-outline"></ion-icon>
+        <div class="spotlight"></div>
+      </ion-tab-button>
 
-    <ion-tab-button tab="recepcion">
-      <ion-icon name="archive-outline"></ion-icon>
-      <ion-label>Recepción</ion-label>
-    </ion-tab-button>
+      <ion-tab-button tab="entrega" [class.tab-selected]="selectedTab === 'entrega'">
+        <div class="indicator"></div>
+        <ion-icon name="person-outline"></ion-icon>
+        <div class="spotlight"></div>
+      </ion-tab-button>
 
-  </ion-tab-bar>
+      <div class="inner-user-label">{{ nombreUsuario }}</div>
+      
+    </div>
+  </div>
 </ion-tabs>
