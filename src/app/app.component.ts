@@ -1,26 +1,14 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { IonicModule, NavController } from '@ionic/angular';
-import { Auth, onAuthStateChanged } from '@angular/fire/auth';
+import { Component } from '@angular/core';
+import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
+  styleUrls: ['app.component.scss'], // Asegúrate de tener esto si usas estilos globales
   standalone: true,
   imports: [IonicModule, CommonModule],
 })
-export class AppComponent implements OnInit {
-  private auth = inject(Auth);
-  private navCtrl = inject(NavController);
-
+export class AppComponent {
   constructor() {}
-
-  ngOnInit() {
-    onAuthStateChanged(this.auth, (user) => {
-      if (!user) {
-        console.log("Sesión inactiva: Mandando al Login");
-        this.navCtrl.navigateRoot('/login');
-      } 
-    });
-  }
 }

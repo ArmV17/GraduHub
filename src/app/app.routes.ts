@@ -2,11 +2,21 @@ import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
 
-// ... imports
 export const routes: Routes = [
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
-  { path: 'login', loadComponent: () => import('./vistas/login/login.page').then(m => m.LoginPage) },
+  // 1. Ruta inicial clara
+  { 
+    path: '', 
+    redirectTo: 'login', 
+    pathMatch: 'full' 
+  },
   
+  // 2. Login (Sin guardias para que siempre pueda cargar)
+  { 
+    path: 'login', 
+    loadComponent: () => import('./vistas/login/login.page').then(m => m.LoginPage) 
+  },
+  
+  // 3. Rutas de Admin
   {
     path: 'admin-home',
     loadComponent: () => import('./vistas/admin-home/admin-home.page').then(m => m.AdminHomePage),
@@ -18,8 +28,9 @@ export const routes: Routes = [
     canActivate: [authGuard, adminGuard]
   },
 
+  // 4. Tabs (Ruta corregida)
   {
-    path: 'tabs', // <--- CAMBIA ESTO: De '' a 'tabs'
+    path: 'tabs',
     loadComponent: () => import('./vistas/tabs/tabs.page').then(m => m.TabsPage),
     canActivate: [authGuard],
     children: [
@@ -30,5 +41,7 @@ export const routes: Routes = [
       { path: '', redirectTo: 'home', pathMatch: 'full' }
     ]
   },
+
+  // 5. Comodín (Siempre al final)
   { path: '**', redirectTo: 'login' }
 ];

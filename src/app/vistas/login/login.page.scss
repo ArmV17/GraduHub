@@ -6,7 +6,7 @@
   height: 100vh;
   display: flex;
   overflow: hidden;
-  background-image: url("/assets/img/estudio.png"); 
+  background-image: url("/assets/img/estudio.jpeg"); 
   background-size: cover;
   background-position: center;
 
@@ -261,3 +261,39 @@
 /* --- CONTROL RESPONSIVO --- */
 @media (max-width: 768px) { .desktop-layout { display: none !important; } }
 @media (min-width: 769px) { .mobile-layout { display: none !important; } }
+
+/* --- ÁREA DE LA MARCA/LOGO EN EL LOGIN --- */
+.brand-area {
+  width: 100%;
+  height: 250px; // Ajusta la altura según tu diseño
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  
+  /* ESTO CREA LA IMAGEN DE ESTUDIO TEMPORAL */
+  background-color: #f0f4ff; // Un fondo azul muy claro
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24'%3E%3Cg fill='none' stroke='%233880ff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z'/%3E%3Cpath d='M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center 40px; // Centrado horizontalmente, 40px desde arriba
+  background-size: 80px; // Tamaño del icono
+
+  /* Título temporal de la App */
+  h1 {
+    margin-top: 130px; // Espacio para el icono SVG
+    color: #1a1c20 !important;
+    font-weight: 900;
+    font-size: 2rem;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 5px;
+  }
+
+  /* Subtítulo */
+  p {
+    color: #64748b !important;
+    font-size: 1rem;
+    margin: 0;
+  }
+}
